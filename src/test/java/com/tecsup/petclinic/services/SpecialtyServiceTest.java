@@ -118,4 +118,63 @@ public class SpecialtyServiceTest {
         assertThrows(SpecialtyNotFoundException.class,
                 () -> this.specialtyService.findById(ID));
     }
+
+    @Test
+    public void testFindSpecialtyById_NotFound() {
+
+        Integer ID_NOT_EXISTS = 9999;
+
+        assertThrows(SpecialtyNotFoundException.class,
+                () -> this.specialtyService.findById(ID_NOT_EXISTS));
+    }
+
+    @Test
+    public void testCreateSpecialty_InvalidSchedule() {
+
+        SpecialtyDTO openAfterClose = SpecialtyDTO.builder()
+                .name("invalid-schedule")
+                .office("Office-Invalid")
+                .hourOpen(18)
+                .hourClose(8)
+                .build();
+
+        SpecialtyDTO sameHour = SpecialtyDTO.builder()
+                .name("invalid-schedule")
+                .office("Office-Invalid")
+                .hourOpen(10)
+                .hourClose(10)
+                .build();
+
+        assertThrows(InvalidScheduleException.class,
+                () -> this.specialtyService.create(openAfterClose));
+        assertThrows(InvalidScheduleException.class,
+                () -> this.specialtyService.create(sameHour));
+
+        assertTrue(this.specialtyService.findByOffice("Office-Invalid").isEmpty());
+    }
+
+    @Test
+    public void testCreateSpecialty_InvalidHourRange() {
+
+        SpecialtyDTO negativeHour = SpecialtyDTO.builder()
+                .name("invalid-range")
+                .office("Office-Range")
+                .hourOpen(-1)
+                .hourClose(10)
+                .build();
+
+        SpecialtyDTO hourTooHigh = SpecialtyDTO.builder()
+                .name("invalid-range")
+                .office("Office-Range")
+                .hourOpen(8)
+                .hourClose(25)
+                .build();
+
+        assertThrows(InvalidScheduleException.class,
+                () -> this.specialtyService.create(negativeHour));
+        assertThrows(InvalidScheduleException.class,
+                () -> this.specialtyService.create(hourTooHigh));
+
+        assertTrue(this.specialtyService.findByOffice("Office-Range").isEmpty());
+    }
 }
