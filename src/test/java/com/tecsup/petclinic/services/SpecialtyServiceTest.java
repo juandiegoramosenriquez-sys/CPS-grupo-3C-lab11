@@ -7,17 +7,64 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
+@Transactional
 @Slf4j
 public class SpecialtyServiceTest {
 
     @Autowired
     private SpecialtyService specialtyService;
+
+    @Test
+    public void testCreateSpecialty() throws InvalidScheduleException {
+        SpecialtyDTO newSpecialty = new SpecialtyDTO(null, "Cardiología", "Consultorio 101", 8, 16);
+
+        SpecialtyDTO created = specialtyService.create(newSpecialty);
+
+        assertNotNull(created.getId(), "El ID de la especialidad creada no debe ser nulo");
+        assertEquals("Cardiología", created.getName());
+        assertEquals("Consultorio 101", created.getOffice());
+        assertEquals(8, created.getHourOpen());
+        assertEquals(16, created.getHourClose());
+    }
+
+    @Test
+    public void testUpdateSpecialty() throws InvalidScheduleException {
+        SpecialtyDTO initial = new SpecialtyDTO(null, "Cardiología", "Consultorio 101", 8, 16);
+        SpecialtyDTO saved = specialtyService.create(initial);
+
+        saved.setName("Cardiología Avanzada");
+        saved.setOffice("Consultorio 202");
+        saved.setHourOpen(9);
+        saved.setHourClose(18);
+
+        SpecialtyDTO updated = specialtyService.update(saved);
+
+        assertEquals(saved.getId(), updated.getId());
+        assertEquals("Cardiología Avanzada", updated.getName());
+        assertEquals("Consultorio 202", updated.getOffice());
+        assertEquals(9, updated.getHourOpen());
+        assertEquals(18, updated.getHourClose());
+    }
+
+    @Test
+    public void testFindSpecialtyById() throws SpecialtyNotFoundException, InvalidScheduleException {
+        SpecialtyDTO newSpecialty = new SpecialtyDTO(null, "Neurología", "Consultorio 303", 10, 15);
+        SpecialtyDTO saved = specialtyService.create(newSpecialty);
+
+        SpecialtyDTO found = specialtyService.findById(saved.getId());
+
+        assertNotNull(found, "La especialidad encontrada no debe ser nula");
+        assertEquals(saved.getId(), found.getId());
+        assertEquals("Neurología", found.getName());
+        assertEquals("Consultorio 303", found.getOffice());
+    }
 
     @Test
     public void testFindByOffice() {
