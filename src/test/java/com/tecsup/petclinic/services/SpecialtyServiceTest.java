@@ -1,37 +1,71 @@
 package com.tecsup.petclinic.services;
 
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.test.context.SpringBootTest;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 
-@SpringBootTest
-@Slf4j
+import java.util.Optional;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import com.tecsup.petclinic.dtos.SpecialtyDTO;
+import com.tecsup.petclinic.entities.Specialty;
+import com.tecsup.petclinic.exceptions.InvalidScheduleException;
+import com.tecsup.petclinic.exceptions.SpecialtyNotFoundException;
+import com.tecsup.petclinic.mappers.SpecialtyMapper;
+import com.tecsup.petclinic.repositories.SpecialtyRepository;
+
+@ExtendWith(MockitoExtension.class)
 public class SpecialtyServiceTest {
 
-	//@Autowired
-   //	private OwnerService ownerService;
+    @Mock
+    private SpecialtyRepository repository;
 
-	/**
-	 * 
-	 */
-	/*
-	@Test
-	public void testFindOwnerById() {
+    @Mock
+    private SpecialtyMapper specialtyMapper;
 
-		long ID = 1;
-		String NAME = "Jaime";
-		Owner owner = null;
-		
-		try {
-			
-			owner = ownerService.findById(ID);
-			
-		} catch (OwnertNotFoundException e) {
-			fail(e.getMessage());
-		}
-		log.info("" + owner);
+    @InjectMocks
+    private SpecialtyServiceImpl specialtyService;
 
-		assertEquals(NAME, owner.getName());
+    @Test
+    public void testFindSpecialtyById_NotFound() {
+        Mockito.when(repository.findById(999)).thenReturn(Optional.empty());
 
-	}
-	*/
+        assertThrows(SpecialtyNotFoundException.class,
+                () -> specialtyService.findById(999));
+    }
+
+    @Test
+    public void testCreateSpecialty_InvalidSchedule() {
+        SpecialtyDTO invalid = Mockito.mock(SpecialtyDTO.class);
+        Mockito.when(invalid.getHourOpen()).thenReturn(18);
+        Mockito.when(invalid.getHourClose()).thenReturn(8);
+
+        assertThrows(InvalidScheduleException.class,
+                () -> specialtyService.create(invalid));
+
+        Mockito.verify(repository, Mockito.never()).save(any(Specialty.class));
+    }
+
+    @Test
+    public void testCreateSpecialty_InvalidHourRange() {
+        SpecialtyDTO negativeHour = Mockito.mock(SpecialtyDTO.class);
+        Mockito.when(negativeHour.getHourOpen()).thenReturn(-1);
+        Mockito.when(negativeHour.getHourClose()).thenReturn(10);
+
+        SpecialtyDTO hourTooHigh = Mockito.mock(SpecialtyDTO.class);
+        Mockito.when(hourTooHigh.getHourOpen()).thenReturn(8);
+        Mockito.when(hourTooHigh.getHourClose()).thenReturn(25);
+
+        assertThrows(InvalidScheduleException.class,
+                () -> specialtyService.create(negativeHour));
+        assertThrows(InvalidScheduleException.class,
+                () -> specialtyService.create(hourTooHigh));
+
+        Mockito.verify(repository, Mockito.never()).save(any(Specialty.class));
+    }
 }
