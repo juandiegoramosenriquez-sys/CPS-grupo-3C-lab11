@@ -27,6 +27,44 @@ public class SpecialtyControllerTest {
 	private MockMvc mockMvc;
 
 	@Test
+	public void testFindAllSpecialties() throws Exception {
+
+		mockMvc.perform(get("/specialties")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$[0].id", is(1)))
+				.andExpect(jsonPath("$[0].name", is("radiology")))
+				.andExpect(jsonPath("$[0].office", is("Farewell")))
+				.andExpect(jsonPath("$[0].hourOpen", is(8)))
+				.andExpect(jsonPath("$[0].hourClose", is(18)));
+	}
+
+	@Test
+	public void testFindSpecialtyOK() throws Exception {
+
+		mockMvc.perform(get("/specialties/1")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id", is(1)))
+				.andExpect(jsonPath("$.name", is("radiology")))
+				.andExpect(jsonPath("$.office", is("Farewell")))
+				.andExpect(jsonPath("$.hourOpen", is(8)))
+				.andExpect(jsonPath("$.hourClose", is(18)));
+	}
+
+	@Test
+	public void testFindSpecialtyKO() throws Exception {
+
+		mockMvc.perform(get("/specialties/666")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
+
+	@Test
 	public void testCreateSpecialty() throws Exception {
 
 		String NAME = "dermatology-juan";

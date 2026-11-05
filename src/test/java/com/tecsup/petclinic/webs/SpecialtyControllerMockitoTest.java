@@ -2,7 +2,9 @@ package com.tecsup.petclinic.webs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tecsup.petclinic.dtos.SpecialtyDTO;
+import com.tecsup.petclinic.exceptions.SpecialtyNotFoundException;
 import com.tecsup.petclinic.services.SpecialtyService;
+import com.tecsup.petclinic.util.TObjectCreator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -33,6 +35,56 @@ public class SpecialtyControllerMockitoTest {
 
 	@MockitoBean
 	private SpecialtyService specialtyService;
+
+	@Test
+	public void testFindAllSpecialties() throws Exception {
+
+		Mockito.when(specialtyService.findAll())
+				.thenReturn(TObjectCreator.getSpecialtiesDTOForFindAll());
+
+		mockMvc.perform(get("/specialties")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.size()", is(3)))
+				.andExpect(jsonPath("$[0].id", is(1)))
+				.andExpect(jsonPath("$[0].name", is("radiology")))
+				.andExpect(jsonPath("$[0].office", is("Farewell")))
+				.andExpect(jsonPath("$[0].hourOpen", is(8)))
+				.andExpect(jsonPath("$[0].hourClose", is(18)));
+	}
+
+	@Test
+	public void testFindSpecialtyOK() throws Exception {
+
+		SpecialtyDTO radiology = TObjectCreator.getSpecialtyDTO1();
+
+		Mockito.when(specialtyService.findById(1))
+				.thenReturn(radiology);
+
+		mockMvc.perform(get("/specialties/1")
+						.accept(MediaType.APPLICATION_JSON))
+				.andDo(print())
+				.andExpect(status().isOk())
+				.andExpect(content().contentType(MediaType.APPLICATION_JSON))
+				.andExpect(jsonPath("$.id", is(radiology.getId())))
+				.andExpect(jsonPath("$.name", is(radiology.getName())))
+				.andExpect(jsonPath("$.office", is(radiology.getOffice())))
+				.andExpect(jsonPath("$.hourOpen", is(radiology.getHourOpen())))
+				.andExpect(jsonPath("$.hourClose", is(radiology.getHourClose())));
+	}
+
+	@Test
+	public void testFindSpecialtyKO() throws Exception {
+
+		Mockito.when(specialtyService.findById(666))
+				.thenThrow(new SpecialtyNotFoundException("Record not found...!"));
+
+		mockMvc.perform(get("/specialties/666")
+						.accept(MediaType.APPLICATION_JSON))
+				.andExpect(status().isNotFound());
+	}
 
 	@Test
 	public void testCreateSpecialty() throws Exception {
@@ -70,13 +122,7 @@ public class SpecialtyControllerMockitoTest {
 	@Test
 	public void testFindByName() throws Exception {
 
-		SpecialtyDTO surgery = SpecialtyDTO.builder()
-				.id(2)
-				.name("surgery")
-				.office("Maryland")
-				.hourOpen(8)
-				.hourClose(12)
-				.build();
+		SpecialtyDTO surgery = TObjectCreator.getSpecialtyDTO2();
 
 		Mockito.when(specialtyService.findByName("surgery"))
 				.thenReturn(List.of(surgery));
@@ -94,13 +140,7 @@ public class SpecialtyControllerMockitoTest {
 	@Test
 	public void testFindByOffice() throws Exception {
 
-		SpecialtyDTO radiology = SpecialtyDTO.builder()
-				.id(1)
-				.name("radiology")
-				.office("Farewell")
-				.hourOpen(8)
-				.hourClose(18)
-				.build();
+		SpecialtyDTO radiology = TObjectCreator.getSpecialtyDTO1();
 
 		Mockito.when(specialtyService.findByOffice("Farewell"))
 				.thenReturn(List.of(radiology));
