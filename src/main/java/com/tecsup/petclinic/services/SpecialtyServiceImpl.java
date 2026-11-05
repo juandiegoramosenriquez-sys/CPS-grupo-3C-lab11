@@ -76,6 +76,15 @@ public class SpecialtyServiceImpl implements SpecialtyService {
 				.toList();
 	}
 
+	@Override
+	public List<SpecialtyDTO> findAll() {
+
+		return specialtyRepository.findAll()
+				.stream()
+				.map(specialtyMapper::mapToDto)
+				.toList();
+	}
+
 	private void validateSchedule(int hourOpen, int hourClose) throws InvalidScheduleException {
 
 		if (hourOpen < 0 || hourOpen > 23 || hourClose < 0 || hourClose > 23)
