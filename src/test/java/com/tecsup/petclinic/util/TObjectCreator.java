@@ -1,7 +1,9 @@
 package com.tecsup.petclinic.util;
 
 import com.tecsup.petclinic.dtos.PetDTO;
+import com.tecsup.petclinic.dtos.SpecialtyDTO;
 import com.tecsup.petclinic.entities.Pet;
+import com.tecsup.petclinic.entities.Specialty;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +41,6 @@ public class TObjectCreator {
 		petDTO.setId(1000);
 		return petDTO;
 	}
-
 
 	public static Pet newPetForUpdate() {
 		return new Pet(0,"Bear",1,1,null);
@@ -79,5 +80,25 @@ public class TObjectCreator {
 		pets.add(new Pet(12,"Lucky",2,10, null));
 		pets.add(new Pet(13,"Sly",1,10, null));
 		return pets;
+	}
+
+	public static SpecialtyDTO getSpecialtyDTO1() {
+		return new SpecialtyDTO(1, "radiology", "Farewell", 8, 18);
+	}
+
+	public static SpecialtyDTO getSpecialtyDTO2() {
+		return new SpecialtyDTO(2, "surgery", "Maryland", 8, 12);
+	}
+
+	public static SpecialtyDTO getSpecialtyDTO3() {
+		return new SpecialtyDTO(3, "dentistry", "Terranova", 9, 19);
+	}
+
+	public static List<SpecialtyDTO> getSpecialtiesDTOForFindAll() {
+		List<SpecialtyDTO> specialties = new ArrayList<>();
+		specialties.add(getSpecialtyDTO1());
+		specialties.add(getSpecialtyDTO2());
+		specialties.add(getSpecialtyDTO3());
+		return specialties;
 	}
 }
