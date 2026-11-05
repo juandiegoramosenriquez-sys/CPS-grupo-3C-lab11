@@ -19,4 +19,6 @@ public interface SpecialtyService {
 	List<SpecialtyDTO> findByName(String name);
 
 	List<SpecialtyDTO> findByOffice(String office);
+
+	List<SpecialtyDTO> findAll();
 }
